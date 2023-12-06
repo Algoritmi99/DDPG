@@ -1,0 +1,48 @@
+----------------------------------------- Package DDPG --------------------------------------
+
+--------------------------- File 1 ------------------------------------
+class: ReplayBuffer
+
+class DDPG:
+    """goal: train an actor NN based on DDPG for a given environment"""
+
+    init(environment, actor: torch.nn.module, critic: torch.nn.module)
+
+    get_actor()
+
+    train(num_episodes)
+
+----------------------- File 4 -------------------------------------
+class DDPG_Visualizer:
+
+----------------------------------------------------------------------------------------------
+
+
+----------------------- File 2 -------------------------------------
+class actor_nn(module.nn):
+    """some nn with choose action"""
+    """chooses the action based on a given environment state"""
+
+    init(staes_num, actor_layer, hiddenLayer_num)
+
+
+----------------------- File 3 -------------------------------------
+class q_net(module.nn):
+    """some nn"""
+    similar to actor nn
+
+
+
+
+
+
+time plan:
+Arash creates a git repo
+Zosia will create the initial project structure
+Arash and Zosia will both develop a training loop for DDPG and merge a good implementation
+Zosia will write a hyperparameter tuner while Arash creates a visualization module.
+
+Arash and Zosia will work on the report
+
+If there is time:
+Arash and Zosia will create a custom gymnasium environment
