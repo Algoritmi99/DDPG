@@ -1,15 +1,12 @@
 from collections import deque
 import random
 
-<<<<<<< HEAD
-=======
 import gymnasium as gym
 import torch
 import torch.nn as nn
 
 from actor import ActorNet
 from critic import CriticNet
->>>>>>> 9d6bac0a74ff3df70ed104f114426a453123316e
 from params import *
 import torch.nn as nn
 import numpy as np
@@ -68,7 +65,7 @@ class DDPG:
     def train(self, actor_optimizer, critic_optimizer, max_episodes=MAX_EPISODES):
         self.__train_rewards_list = []
 
-        print("Starting Training:\n")
+        print("Starting Training:\n running on " + device)
         for episode in range(max_episodes):
             state = self.__env.reset()
             state = torch.tensor(state[0], device=device, dtype=dtype).unsqueeze(0)
