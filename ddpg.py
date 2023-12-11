@@ -1,6 +1,15 @@
 from collections import deque
 import random
 
+<<<<<<< HEAD
+=======
+import gymnasium as gym
+import torch
+import torch.nn as nn
+
+from actor import ActorNet
+from critic import CriticNet
+>>>>>>> 9d6bac0a74ff3df70ed104f114426a453123316e
 from params import *
 import torch.nn as nn
 import numpy as np
@@ -39,7 +48,12 @@ def target_network_update(net_params, target_net_params):
 
 
 class DDPG:
-    def __init__(self, env, actor, critic, target_actor, target_critic):
+    def __init__(self, env: gym.Env,
+                 actor: ActorNet,
+                 critic: CriticNet,
+                 target_actor: ActorNet,
+                 target_critic: CriticNet
+                 ):
         self.__env = env
         self.__actor = actor
         self.__critic = critic
@@ -62,7 +76,9 @@ class DDPG:
 
             for time in range(MAX_TIME_STEPS):
                 action = self.__actor.select_action(state, self.__env)
+                action = action.clone().detach().cpu()
                 next_state, reward, terminated, truncated, _ = self.__env.step(action[0])
+                action = action.clone().detach().to(device)
                 done = terminated or truncated
                 episode_reward += reward
 
