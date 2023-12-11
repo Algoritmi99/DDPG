@@ -18,10 +18,10 @@ class ActorNet(nn.Module):
             nn.Tanh()
         ).to(device).to(dtype)
 
-    def forward(self, state):
+    def forward(self, state) -> torch.Tensor:
         return self.net(state)
 
-    def select_action(self, state, env):
+    def select_action(self, state, env) -> torch.Tensor:
         with (torch.no_grad()):
             noise = np.random.normal(0, 1, 1)
             action = self.forward(state) + \

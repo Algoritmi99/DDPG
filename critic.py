@@ -14,5 +14,5 @@ class CriticNet(nn.Module):
             nn.Linear(critic_layer, 1)
         ).to(device).to(dtype)
 
-    def forward(self, state, action):
+    def forward(self, state, action) -> torch.Tensor:
         return self.net(torch.cat((state, action), 1))
