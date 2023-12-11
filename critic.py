@@ -11,6 +11,8 @@ class CriticNet(nn.Module):
             nn.Linear(n_states + action_dim, critic_layer),
             nn.ReLU(),
             nn.Linear(critic_layer, critic_layer),
+            nn.ReLU(),
+            nn.Linear(critic_layer, critic_layer),
             nn.Linear(critic_layer, 1)
         ).to(device).to(dtype)
 
