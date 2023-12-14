@@ -12,4 +12,5 @@ BATCH_SIZE = 128
 
 dtype = torch.double
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# device = 'cpu'
 transition = namedtuple("Transition", ("state", "action", "reward", "next_state", "done"))
