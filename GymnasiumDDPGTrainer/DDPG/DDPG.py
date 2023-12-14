@@ -117,3 +117,6 @@ class DDPG:
 
     def get_losses(self):
         return self.__actor_error_history, self.__critic_error_history
+
+    def get_actor(self):
+        return self.__actor

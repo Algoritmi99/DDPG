@@ -9,7 +9,8 @@ from GymnasiumDDPGTrainer import Actor, Critic
 
 from GymnasiumDDPGTrainer.DDPG.DDPG import DDPG
 
-if __name__ == '__main__':
+
+def main():
     settingsFile = open("settings.json")
     settings = json.load(settingsFile)
     settingsFile.close()
@@ -42,7 +43,6 @@ if __name__ == '__main__':
 
     rew_list = agent.get_reward_list()
     plt.plot(rew_list)
-    plt.show()
 
     actor_error_hist, critic_error_hist = agent.get_losses()
     fig, ax = plt.subplots()
@@ -55,3 +55,7 @@ if __name__ == '__main__':
 
     fig.savefig("400_layer_both.png")
     plt.show()
+
+
+if __name__ == "__main__":
+    main()
