@@ -5,6 +5,7 @@ import torch.nn as nn
 from GymnasiumDDPGTrainer.Actor import ActorNet
 from GymnasiumDDPGTrainer.Critic import CriticNet
 from GymnasiumDDPGTrainer.DDPG.ReplayBuffer import ReplayBuffer
+from GymnasiumDDPGTrainer.Ecosystem import Ecosystem
 
 dtype = torch.double
 
@@ -21,7 +22,7 @@ def target_network_update(net_params, target_net_params, polyak):
 
 
 class DDPG:
-    def __init__(self, env: gym.Env,
+    def __init__(self, environment: gym.Env,
                  actor: ActorNet,
                  critic: CriticNet,
                  target_actor: ActorNet,
@@ -29,7 +30,7 @@ class DDPG:
                  hyper_params: dict,
                  device: str = "cpu"
                  ):
-        self.__env = env
+        self.__env = environment
         self.__actor = actor
         self.__critic = critic
         self.__target_actor = target_actor
@@ -38,35 +39,23 @@ class DDPG:
         self.__device = device
 
         self.__replay_buffer = ReplayBuffer(hyper_params["MAX_BUFFER_SIZE"], hyper_params["BATCH_SIZE"])
+        self.__ecosystem = Ecosystem(self.__env, self.__actor, self.__device, dtype)
         self.__train_rewards_list = None
         self.__actor_error_history = []
         self.__critic_error_history = []
-
-    def __take_action(self, state) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        action = self.__actor.select_action(state, self.__env)
-        action = action.cpu()
-        next_state, reward, terminated, truncated, _ = self.__env.step(action[0])
-        action = action.to(self.__device)
-
-        next_state = torch.tensor(next_state, device=self.__device, dtype=dtype).unsqueeze(0)
-        reward = torch.tensor([reward], device=self.__device, dtype=dtype).unsqueeze(0)
-        done = torch.tensor([terminated or truncated], device=self.__device, dtype=dtype).unsqueeze(0)
-        self.__replay_buffer.store_transition(state, action, reward, next_state, done)
-
-        return action, next_state, reward, done
 
     def train(self, actor_optimizer, critic_optimizer, max_episodes=50):
         print("Starting Training:\nTraining on " + str(self.__device))
 
         self.__train_rewards_list = []
         for episode in range(max_episodes):
-            state = self.__env.reset()
-            state = torch.tensor(state[0], device=self.__device, dtype=dtype).unsqueeze(0)
+            state = torch.tensor(self.__ecosystem.reset_environment(), device=self.__device, dtype=dtype).unsqueeze(0)
             episode_reward = 0
 
             for time in range(self.__hyper_params["MAX_TIME_STEPS"]):
-                # take an action according to the Actor NN
-                action, next_state, reward, done = self.__take_action(state)
+                # take an action according to the Actor NN and store to replay buffer
+                self.__env, action, next_state, reward, done = self.__ecosystem.take_action(state)
+                self.__replay_buffer.store_transition(state, action, reward, next_state, done)
                 episode_reward += float(reward[0][0])
                 state = next_state
 
@@ -98,6 +87,8 @@ class DDPG:
                 target_network_update(
                     self.__actor.parameters(), self.__target_actor.parameters(), self.__hyper_params["POLYAK"]
                 )
+                self.__ecosystem.set_actor(self.__actor)
+
                 target_network_update(
                     self.__critic.parameters(), self.__target_critic.parameters(), self.__hyper_params["POLYAK"]
                 )
