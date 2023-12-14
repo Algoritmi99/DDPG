@@ -102,12 +102,14 @@ class DDPG:
 
         self.__env.close()
 
-    def get_reward_list(self):
-        reward_list = self.__train_rewards_list
-        return reward_list
+    def get_reward_list(self) -> list[int]:
+        return self.__train_rewards_list
 
-    def get_losses(self):
+    def get_losses(self) -> tuple[list, list]:
         return self.__actor_error_history, self.__critic_error_history
 
-    def get_actor(self):
+    def get_actor(self) -> ActorNet:
         return self.__actor
+
+    def get_ecosystem(self) -> Ecosystem:
+        return self.__ecosystem
