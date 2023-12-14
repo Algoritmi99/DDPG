@@ -2,12 +2,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from params import device, dtype
-
 
 class ActorNet(nn.Module):
-    def __init__(self, n_states, actor_layer):
+    def __init__(self, n_states, actor_layer, device="cpu", dtype=torch.float32):
         super(ActorNet, self).__init__()
+        self.device = device
+        self.dtype = dtype
 
         self.net = nn.Sequential(
             nn.Linear(n_states, actor_layer),
@@ -16,7 +16,7 @@ class ActorNet(nn.Module):
             nn.ReLU(),
             nn.Linear(actor_layer, 1),
             nn.Tanh()
-        ).to(device).to(dtype)
+        ).to(self.device).to(self.dtype)
 
     def forward(self, state) -> torch.Tensor:
         return self.net(state)
@@ -25,7 +25,7 @@ class ActorNet(nn.Module):
         with (torch.no_grad()):
             noise = np.random.normal(0, 1, 1)
             action = self.forward(state) + \
-                noise[0] * torch.randn(size=env.action_space.shape, device=device, dtype=dtype)
+                noise[0] * torch.randn(size=env.action_space.shape, device=self.device, dtype=self.dtype)
 
             return action
 
