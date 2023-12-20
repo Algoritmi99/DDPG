@@ -65,7 +65,7 @@ class DDPG:
     def train(self, actor_optimizer, critic_optimizer, max_episodes=MAX_EPISODES):
         self.__train_rewards_list = []
 
-        print("Starting Training:\n running on " + device)
+        print("Starting Training:\n running on " + str(device))
         for episode in range(max_episodes):
             state = self.__env.reset()
             state = torch.tensor(state[0], device=device, dtype=dtype).unsqueeze(0)
@@ -96,7 +96,6 @@ class DDPG:
                 critic_loss = nn.MSELoss()(
                     target, self.__critic.forward(sample_batch.state, sample_batch.action))
                 self.__critic_error_history.append(critic_loss.item())
-
                 network_update(critic_loss, critic_optimizer)
 
                 actor_loss = -1 * torch.mean(
