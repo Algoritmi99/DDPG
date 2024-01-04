@@ -5,6 +5,7 @@ import numpy as np
 
 from GymnasiumDDPGTrainer.Actor import ActorNet
 from GymnasiumDDPGTrainer.Critic import CriticNet
+from GymnasiumDDPGTrainer.OUNoise import OUNoise
 from GymnasiumDDPGTrainer.DDPG.ReplayBuffer import ReplayBuffer
 from GymnasiumDDPGTrainer.Ecosystem import Ecosystem
 
@@ -28,6 +29,7 @@ class DDPG:
                  critic: CriticNet,
                  target_actor: ActorNet,
                  target_critic: CriticNet,
+                 noise: OUNoise,
                  hyper_params: dict,
                  device: str = "cpu"
                  ):
@@ -36,11 +38,12 @@ class DDPG:
         self.__critic = critic
         self.__target_actor = target_actor
         self.__target_critic = target_critic
+        self.__noise = noise
         self.__hyper_params = hyper_params
         self.__device = device
 
         self.__replay_buffer = ReplayBuffer(hyper_params["MAX_BUFFER_SIZE"], hyper_params["MINIBATCH"])
-        self.__ecosystem = Ecosystem(self.__env, self.__actor, self.__device, dtype)
+        self.__ecosystem = Ecosystem(self.__env, self.__actor, self.__noise,  self.__device, dtype)
         self.__train_rewards_list = None
         self.__avg_train_rewards_list = None
         self.__greedy_train_rewards_list = None
@@ -51,18 +54,18 @@ class DDPG:
     def train(self, actor_optimizer, critic_optimizer, max_episodes=50):
         print("Starting Training:\nTraining on " + str(self.__device))
 
-        self.__train_rewards_list, self.__avg_train_rewards_list, self.__greedy_train_rewards_list, self.__greedy_avg_train_rewards_list = [], [], [], []
-        # interactions_counter = 0
+        (self.__train_rewards_list, self.__avg_train_rewards_list,
+         self.__greedy_train_rewards_list, self.__greedy_avg_train_rewards_list) = [], [], [], []
 
         for episode in range(max_episodes):
-            if episode%10 == 0:
+            if episode % 10 == 0:
                 self.train_for_plot()
 
             state = torch.tensor(self.__ecosystem.reset_environment(), device=self.__device, dtype=dtype).unsqueeze(0)
+            self.__ecosystem.reset()
             episode_reward = 0
 
             for time in range(self.__hyper_params["MAX_TIME_STEPS"]):
-                # interactions_counter += 1
 
                 # take an action according to the Actor NN and store to replay buffer
                 self.__env, action, next_state, reward, done = self.__ecosystem.take_action(state)
@@ -123,7 +126,7 @@ class DDPG:
             for time in range(self.__hyper_params["MAX_TIME_STEPS"]):
 
                 # take an action according to the Actor NN
-                self.__env, action, next_state, reward, done = self.__ecosystem.greedy_action(state)
+                self.__env, action, next_state, reward, done = self.__ecosystem.take_action(state, add_noise=False)
                 episode_reward += float(reward[0][0])
                 state = next_state
 

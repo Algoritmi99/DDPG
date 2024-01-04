@@ -5,7 +5,7 @@ from .LayersInit import hidden_layer_init
 
 
 class ActorNet(nn.Module):
-    def __init__(self, n_states, device="cpu", dtype=torch.float32, fc1_units=400, fc2_units=300):
+    def __init__(self, n_states, action_dim, device="cpu", dtype=torch.float32, fc1_units=400, fc2_units=300):
         super(ActorNet, self).__init__()
         self.device = device
         self.dtype = dtype
@@ -15,7 +15,7 @@ class ActorNet(nn.Module):
             nn.ReLU(),
             nn.Linear(fc1_units, fc2_units),
             nn.ReLU(),
-            nn.Linear(fc2_units, 1),
+            nn.Linear(fc2_units, action_dim),
             nn.Tanh()
         ).to(self.device).to(self.dtype)
         self.reset_params()
@@ -33,15 +33,6 @@ class ActorNet(nn.Module):
 
     def select_action(self, state, env) -> torch.Tensor:
         with (torch.no_grad()):
-            noise = np.random.normal(0, 1, 1)
-            action = self.forward(state) + \
-                noise[0] * torch.randn(size=env.action_space.shape, device=self.device, dtype=self.dtype)
-
-        return action
-
-    def no_noise_select_action(self, state, env) -> torch.Tensor:
-        with (torch.no_grad()):
             action = self.forward(state) + torch.randn(size=env.action_space.shape, device=self.device, dtype=self.dtype)
 
         return action
-

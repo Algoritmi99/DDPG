@@ -8,6 +8,6 @@
     "MINIBATCH": 64,
     "WEIGHT_DECAY": 10e2,
     "MAX_TIME_STEPS": 3000,
-    "MAX_EPISODES": 200
+    "MAX_EPISODES": 50
   }
 }
