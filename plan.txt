@@ -1,3 +1,17 @@
+
+x-axis number of interactions with the environment
+y-axis return per episode
+
+training return: DONE
+At the end of each episode during training,
+plot a point according to the accumulated rewards of that episode (the return) at the according point on the x-axis
+
+evaluation return:
+At some frequency (e.g. every 5000 interactions steps)
+run your greedy policy without exploration for a few episodes on the environment
+and plot the average return over these episodes.
+Do not use the interactions as data for training this is solely for plotting purposes.
+
 //save actor
 
 ----------------------------------------- Package DDPG --------------------------------------

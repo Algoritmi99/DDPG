@@ -24,6 +24,19 @@ class Ecosystem:
 
         return self.__environment, action, next_state, reward, done
 
+    def greedy_action(self, state) -> tuple[gym.Env, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        action = self.__actor.no_noise_select_action(state, self.__environment)
+        action = action.cpu()
+        next_state, reward, terminated, truncated, _ = self.__environment.step(action[0])
+        action = action.to(self.__device)
+
+        next_state = torch.tensor(next_state, device=self.__device, dtype=self.__dtype).unsqueeze(0)
+        reward = torch.tensor([reward], device=self.__device, dtype=self.__dtype).unsqueeze(0)
+        done = torch.tensor([terminated or truncated], device=self.__device, dtype=self.__dtype).unsqueeze(0)
+
+        return self.__environment, action, next_state, reward, done
+
+
     def get_environment(self) -> gym.Env:
         return self.__environment
 

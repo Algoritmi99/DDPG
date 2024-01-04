@@ -1,6 +1,7 @@
 import torch
 import gymnasium as gym
 import torch.nn as nn
+import numpy as np
 
 from GymnasiumDDPGTrainer.Actor import ActorNet
 from GymnasiumDDPGTrainer.Critic import CriticNet
@@ -38,21 +39,31 @@ class DDPG:
         self.__hyper_params = hyper_params
         self.__device = device
 
-        self.__replay_buffer = ReplayBuffer(hyper_params["MAX_BUFFER_SIZE"], hyper_params["BATCH_SIZE"])
+        self.__replay_buffer = ReplayBuffer(hyper_params["MAX_BUFFER_SIZE"], hyper_params["MINIBATCH"])
         self.__ecosystem = Ecosystem(self.__env, self.__actor, self.__device, dtype)
         self.__train_rewards_list = None
+        self.__avg_train_rewards_list = None
+        self.__greedy_train_rewards_list = None
+        self.__greedy_avg_train_rewards_list = None
         self.__actor_error_history = []
         self.__critic_error_history = []
 
     def train(self, actor_optimizer, critic_optimizer, max_episodes=50):
         print("Starting Training:\nTraining on " + str(self.__device))
 
-        self.__train_rewards_list = []
+        self.__train_rewards_list, self.__avg_train_rewards_list, self.__greedy_train_rewards_list, self.__greedy_avg_train_rewards_list = [], [], [], []
+        # interactions_counter = 0
+
         for episode in range(max_episodes):
+            if episode%10 == 0:
+                self.train_for_plot()
+
             state = torch.tensor(self.__ecosystem.reset_environment(), device=self.__device, dtype=dtype).unsqueeze(0)
             episode_reward = 0
 
             for time in range(self.__hyper_params["MAX_TIME_STEPS"]):
+                # interactions_counter += 1
+
                 # take an action according to the Actor NN and store to replay buffer
                 self.__env, action, next_state, reward, done = self.__ecosystem.take_action(state)
                 self.__replay_buffer.store_transition(state, action, reward, next_state, done)
@@ -99,11 +110,42 @@ class DDPG:
                     break
 
             self.__train_rewards_list.append(episode_reward)
+            self.__avg_train_rewards_list.append(np.mean(self.__train_rewards_list[-10:]))
 
         self.__env.close()
 
+    def train_for_plot(self):
+        print("train function for plottings")
+        for episode in range(10):
+            state = torch.tensor(self.__ecosystem.reset_environment(), device=self.__device, dtype=dtype).unsqueeze(0)
+            episode_reward = 0
+
+            for time in range(self.__hyper_params["MAX_TIME_STEPS"]):
+
+                # take an action according to the Actor NN
+                self.__env, action, next_state, reward, done = self.__ecosystem.greedy_action(state)
+                episode_reward += float(reward[0][0])
+                state = next_state
+
+                if done:
+                    print("Completed episode {}/{}".format(
+                        episode + 1, 10))
+                    break
+
+            self.__greedy_train_rewards_list.append(episode_reward)
+            self.__greedy_avg_train_rewards_list.append(np.mean(self.__greedy_train_rewards_list[-10:]))
+
     def get_reward_list(self) -> list[int]:
         return self.__train_rewards_list
+
+    def get_avg_reward_list(self) -> list[int]:
+        return self.__avg_train_rewards_list
+
+    def get_greedy_reward_list(self) -> list[int]:
+        return self.__greedy_train_rewards_list
+
+    def get_greedy_avg_reward_list(self) -> list[int]:
+        return self.__greedy_avg_train_rewards_list
 
     def get_losses(self) -> tuple[list, list]:
         return self.__actor_error_history, self.__critic_error_history
