@@ -37,7 +37,7 @@ class q_net(module.nn):
 
 
 
-
+u burned urself?
 
 time plan:
 Arash creates a git repo

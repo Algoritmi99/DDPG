@@ -1,6 +1,7 @@
 import gymnasium as gym
 import torch
 import json
+import sys
 
 from torch.optim import Adam
 import matplotlib.pyplot as plt
@@ -10,7 +11,7 @@ from GymnasiumDDPGTrainer import Actor, Critic
 from GymnasiumDDPGTrainer.DDPG.DDPG import DDPG
 
 
-def main():
+def main(args):
     settingsFile = open("settings.json")
     settings = json.load(settingsFile)
     settingsFile.close()
@@ -18,19 +19,28 @@ def main():
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    environment = gym.make("MountainCarContinuous-v0")
+    environment = gym.make("Ant-v4")
 
-    actor_net = Actor.ActorNet(environment.observation_space.shape[0], 400, device, torch.double)
+    dtype = torch.float32
+
+    actor_net = Actor.ActorNet(
+        environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype
+    )
     critic_net = Critic.CriticNet(
-        environment.observation_space.shape[0], environment.action_space.shape[0], 400, device, torch.double
+        environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype
     )
 
-    actor_optimizer = Adam(actor_net.parameters(), lr=settings["HYPERPARAMS"]["LR"])
-    critic_optimizer = Adam(critic_net.parameters(), lr=settings["HYPERPARAMS"]["LR"])
+    actor_optimizer = Adam(actor_net.parameters(), lr=settings["HYPERPARAMS"]["ACTOR_LR"])
+    critic_optimizer = Adam(
+        critic_net.parameters(), lr=settings["HYPERPARAMS"]["CRITIC_LR"],
+        weight_decay=settings["HYPERPARAMS"]["WEIGHT_DECAY"]
+    )
 
-    target_actor_net = Actor.ActorNet(environment.observation_space.shape[0], 400, device, torch.double)
+    target_actor_net = Actor.ActorNet(
+        environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype
+    )
     target_critic_net = Critic.CriticNet(
-        environment.observation_space.shape[0], environment.action_space.shape[0], 400, device, torch.double
+        environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype
     )
 
     target_actor_net.load_state_dict(actor_net.state_dict())
@@ -58,4 +68,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

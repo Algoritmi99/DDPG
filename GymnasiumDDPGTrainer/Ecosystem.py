@@ -6,7 +6,7 @@ from GymnasiumDDPGTrainer.Actor import ActorNet
 
 
 class Ecosystem:
-    def __init__(self, environment: gym.Env, actor: ActorNet, device="cpu", dtype=torch.double):
+    def __init__(self, environment: gym.Env, actor: ActorNet, device="cpu", dtype=torch.float32):
         self.__environment = environment
         self.__actor = actor
         self.__device = device
@@ -15,7 +15,7 @@ class Ecosystem:
     def take_action(self, state) -> tuple[gym.Env, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         action = self.__actor.select_action(state, self.__environment)
         action = action.cpu()
-        next_state, reward, terminated, truncated, _ = self.__environment.step(action[0])
+        next_state, reward, terminated, truncated, _ = self.__environment.step(action[0].numpy())
         action = action.to(self.__device)
 
         next_state = torch.tensor(next_state, device=self.__device, dtype=self.__dtype).unsqueeze(0)

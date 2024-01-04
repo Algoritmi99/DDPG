@@ -7,7 +7,7 @@ from GymnasiumDDPGTrainer.Critic import CriticNet
 from GymnasiumDDPGTrainer.DDPG.ReplayBuffer import ReplayBuffer
 from GymnasiumDDPGTrainer.Ecosystem import Ecosystem
 
-dtype = torch.double
+dtype = torch.float32
 
 
 def network_update(loss, optim):
@@ -37,8 +37,7 @@ class DDPG:
         self.__target_critic = target_critic
         self.__hyper_params = hyper_params
         self.__device = device
-
-        self.__replay_buffer = ReplayBuffer(hyper_params["MAX_BUFFER_SIZE"], hyper_params["BATCH_SIZE"])
+        self.__replay_buffer = ReplayBuffer(hyper_params["MAX_BUFFER_SIZE"], hyper_params["MINIBATCH"])
         self.__ecosystem = Ecosystem(self.__env, self.__actor, self.__device, dtype)
         self.__train_rewards_list = None
         self.__actor_error_history = []
@@ -56,7 +55,7 @@ class DDPG:
                 # take an action according to the Actor NN and store to replay buffer
                 self.__env, action, next_state, reward, done = self.__ecosystem.take_action(state)
                 self.__replay_buffer.store_transition(state, action, reward, next_state, done)
-                episode_reward += float(reward[0][0])
+                episode_reward += float(reward)
                 state = next_state
 
                 # Make a sample batch according to the replay buffer
@@ -67,7 +66,8 @@ class DDPG:
                     target = sample_batch.reward + \
                              (1 - sample_batch.done) * self.__hyper_params["GAMMA"] * \
                              self.__target_critic.forward(sample_batch.next_state,
-                                                          self.__target_actor(sample_batch.next_state))
+                                                          self.__target_actor(sample_batch.next_state)
+                                                          )
 
                 critic_loss = nn.MSELoss()(
                     target, self.__critic.forward(sample_batch.state, sample_batch.action)
@@ -87,7 +87,6 @@ class DDPG:
                 target_network_update(
                     self.__actor.parameters(), self.__target_actor.parameters(), self.__hyper_params["POLYAK"]
                 )
-                self.__ecosystem.set_actor(self.__actor)
 
                 target_network_update(
                     self.__critic.parameters(), self.__target_critic.parameters(), self.__hyper_params["POLYAK"]
