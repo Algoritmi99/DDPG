@@ -1,8 +1,8 @@
-import numpy as np
 import torch
 import torch.nn as nn
-from GymnasiumDDPGTrainer.StaticAlgorithms import hidden_layer_init
+
 from GymnasiumDDPGTrainer.OUNoise import OUNoise
+from GymnasiumDDPGTrainer.StaticAlgorithms import hidden_layer_init
 
 
 class ActorNet(nn.Module):
