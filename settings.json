@@ -9,5 +9,8 @@
     "WEIGHT_DECAY": 10e2,
     "MAX_TIME_STEPS": 3000,
     "MAX_EPISODES": 200
+  },
+  "SETTINGS": {
+    "dtype": "float32"
   }
 }

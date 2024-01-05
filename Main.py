@@ -22,9 +22,10 @@ def main(args):
 
     environment = gym.make("Ant-v4")
 
-    dtype = torch.float32
+    dtypeString = settings["SETTINGS"]["dtype"]
+    dtype = torch.float32 if dtypeString == "float32" else torch.float
 
-    noise = OUNoise(environment.action_space.shape[0], dtype="float32")
+    noise = OUNoise(environment.action_space.shape[0], dtype=dtypeString)
 
     actor_net = Actor.ActorNet(
         environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype, noise=noise
