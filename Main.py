@@ -19,7 +19,7 @@ def main():
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    environment = gym.make('MountainCarContinuous-v0')
+    environment = gym.make('HumanoidStandup-v4')
 
     actor_net = Actor.ActorNet(
         environment.observation_space.shape[0], environment.action_space.shape[0], device, torch.double

@@ -16,10 +16,10 @@ class Ecosystem:
 
     def take_action(self, state, add_noise=True) -> tuple[gym.Env, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         action = self.__actor.select_action(state, self.__environment)
+        action = action.cpu()
         if add_noise:
             action += self.__noise.sample()
-        action = action.cpu()
-        next_state, reward, terminated, truncated, _ = self.__environment.step(action[0])
+        next_state, reward, terminated, truncated, _ = self.__environment.step(action[0].numpy())
         action = action.to(self.__device)
 
         next_state = torch.tensor(next_state, device=self.__device, dtype=self.__dtype).unsqueeze(0)
