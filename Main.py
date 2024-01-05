@@ -19,7 +19,7 @@ def main(args):
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    environment = gym.make("Ant-v4")
+    environment = gym.make("HalfCheetah-v4")
 
     dtype = torch.float32
 

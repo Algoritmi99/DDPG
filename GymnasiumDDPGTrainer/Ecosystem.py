@@ -22,6 +22,11 @@ class Ecosystem:
         reward = torch.tensor([reward], device=self.__device, dtype=self.__dtype).unsqueeze(0)
         done = torch.tensor([terminated or truncated], device=self.__device, dtype=self.__dtype).unsqueeze(0)
 
+        if terminated:
+            print("terminated")
+        if truncated:
+            print("truncated")
+
         return self.__environment, action, next_state, reward, done
 
     def get_environment(self) -> gym.Env:
