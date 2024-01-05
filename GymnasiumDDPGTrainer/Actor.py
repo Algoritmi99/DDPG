@@ -2,13 +2,17 @@ import numpy as np
 import torch
 import torch.nn as nn
 from GymnasiumDDPGTrainer.StaticAlgorithms import hidden_layer_init
+from GymnasiumDDPGTrainer.OUNoise import OUNoise
 
 
 class ActorNet(nn.Module):
-    def __init__(self, state_dim, action_dim, device="cpu", dtype=torch.float32, fc1_units=400, fc2_units=300):
+    def __init__(self, state_dim, action_dim,
+                 device="cpu", dtype=torch.float32, fc1_units=400, fc2_units=300, noise: str | OUNoise = "default"
+                 ):
         super(ActorNet, self).__init__()
         self.device = device
         self.dtype = dtype
+        self.noise = noise
 
         self.net = nn.Sequential(
             nn.Linear(state_dim, fc1_units),
@@ -33,9 +37,13 @@ class ActorNet(nn.Module):
 
     def select_action(self, state, env) -> torch.Tensor:
         with (torch.no_grad()):
-            noise = np.random.normal(0, 1, 1)
-            action = self.forward(state) + \
-                noise[0] * torch.randn(size=env.action_space.shape, device=self.device, dtype=self.dtype)
+            if self.noise == "default":
+                action = self.forward(state) + torch.randn(
+                    size=env.action_space.shape, device=self.device, dtype=self.dtype
+                )
+            else:
+                action = self.forward(state).cpu() + self.noise.sample()
+                action.to(self.device)
         return action
 
     def save(self, filename: str) -> None:
@@ -43,4 +51,3 @@ class ActorNet(nn.Module):
 
     def load(self, filename: str) -> None:
         self.load_state_dict(torch.load(filename))
-

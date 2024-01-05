@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from GymnasiumDDPGTrainer import Actor, Critic
 
 from GymnasiumDDPGTrainer.DDPG.DDPG import DDPG
+from GymnasiumDDPGTrainer.OUNoise import OUNoise
 
 
 def main(args):
@@ -19,12 +20,14 @@ def main(args):
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    environment = gym.make("HalfCheetah-v4")
+    environment = gym.make("Ant-v4")
 
     dtype = torch.float32
 
+    noise = OUNoise(environment.action_space.shape[0], dtype="float32")
+
     actor_net = Actor.ActorNet(
-        environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype
+        environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype, noise=noise
     )
     critic_net = Critic.CriticNet(
         environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype
@@ -37,7 +40,7 @@ def main(args):
     )
 
     target_actor_net = Actor.ActorNet(
-        environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype
+        environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype, noise=noise
     )
     target_critic_net = Critic.CriticNet(
         environment.observation_space.shape[0], environment.action_space.shape[0], device, dtype
