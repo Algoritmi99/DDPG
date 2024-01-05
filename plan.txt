@@ -34,18 +34,3 @@ class q_net(module.nn):
     """some nn"""
     similar to actor nn
 
-
-
-
-u burned urself?
-
-time plan:
-Arash creates a git repo
-Zosia will create the initial project structure
-Arash and Zosia will both develop a training loop for DDPG and merge a good implementation
-Zosia will write a hyperparameter tuner while Arash creates a visualization module.
-
-Arash and Zosia will work on the report
-
-If there is time:
-Arash and Zosia will create a custom gymnasium environment
