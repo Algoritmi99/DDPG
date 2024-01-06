@@ -13,6 +13,7 @@ class ActorNet(nn.Module):
         self.device = device
         self.dtype = dtype
         self.noise = noise
+        self.greedyDecisionMode = False
 
         self.net = nn.Sequential(
             nn.Linear(state_dim, fc1_units),
@@ -37,7 +38,9 @@ class ActorNet(nn.Module):
 
     def select_action(self, state, env) -> torch.Tensor:
         with (torch.no_grad()):
-            if self.noise == "default":
+            if self.greedyDecisionMode:
+                action = self.forward(state)
+            elif self.noise == "default":
                 action = self.forward(state) + torch.randn(
                     size=env.action_space.shape, device=self.device, dtype=self.dtype
                 )
@@ -45,6 +48,18 @@ class ActorNet(nn.Module):
                 action = self.forward(state).cpu() + self.noise.sample()
                 action.to(self.device)
         return action
+
+    def greedy(self):
+        self.greedyDecisionMode = True
+
+    def normal(self):
+        self.greedyDecisionMode = False
+
+    def change_decision_mode(self):
+        if self.greedyDecisionMode:
+            self.normal()
+        else:
+            self.greedy()
 
     def save(self, filename: str) -> None:
         torch.save(self, filename)

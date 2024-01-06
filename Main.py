@@ -20,7 +20,7 @@ def main(args):
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    environment = gym.make("Ant-v4")
+    environment = gym.make("HumanoidStandup-v4")
 
     dtypeString = settings["SETTINGS"]["dtype"]
     dtype = torch.float32 if dtypeString == "float32" else torch.float
