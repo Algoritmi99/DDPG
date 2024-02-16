@@ -4,10 +4,10 @@
     "GAMMA": 0.99,
     "CRITIC_LR": 10e-3,
     "ACTOR_LR": 10e-4,
-    "POLYAK": 0.001,
+    "TAU": 0.001,
     "MINIBATCH": 64,
     "WEIGHT_DECAY": 10e2,
-    "MAX_TIME_STEPS": 3000,
-    "MAX_EPISODES": 100
+    "MAX_TIME_STEPS": 500,
+    "MAX_EPISODES": 1000
   }
 }

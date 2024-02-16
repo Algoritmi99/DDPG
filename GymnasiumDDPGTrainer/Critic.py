@@ -31,7 +31,7 @@ class CriticNet(nn.Module):
                 if i == 0:
                     torch.nn.init.uniform_(hidden_layer_init(layer))
                 else:
-                    torch.nn.init.uniform_(layer.weight, a=-3e-3, b=3e-3)
+                    torch.nn.init.uniform_(layer.weight, a=-3e-4, b=3e-4)
 
     def forward(self, state, action) -> torch.Tensor:
         state_net_output = self.state_net(state)

@@ -99,12 +99,12 @@ class DDPG:
 
                 # update both actor and critic networks
                 target_network_update(
-                    self.__actor.parameters(), self.__target_actor.parameters(), self.__hyper_params["POLYAK"]
+                    self.__actor.parameters(), self.__target_actor.parameters(), self.__hyper_params["TAU"]
                 )
                 self.__ecosystem.set_actor(self.__actor)
 
                 target_network_update(
-                    self.__critic.parameters(), self.__target_critic.parameters(), self.__hyper_params["POLYAK"]
+                    self.__critic.parameters(), self.__target_critic.parameters(), self.__hyper_params["TAU"]
                 )
 
                 if done:
