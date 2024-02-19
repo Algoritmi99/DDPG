@@ -40,8 +40,7 @@ def train_and_save(settings: dict):
     actor = Actor(train_env.observation_space.shape[0], train_env.action_space.shape[0], device=device)
     critic = Critic(train_env.observation_space.shape[0], train_env.action_space.shape[0], device=device)
 
-    actor_optimizer = (torch
-                       .optim.AdamW(params=actor.parameters(), lr=learning_rate))
+    actor_optimizer = (torch.optim.AdamW(params=actor.parameters(), lr=learning_rate))
     critic_optimizer = torch.optim.AdamW(params=critic.parameters(), lr=learning_rate)
 
     agent = Agent(

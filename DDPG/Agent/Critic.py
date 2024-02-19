@@ -23,6 +23,8 @@ class Critic(nn.Module):
             nn.Linear(fc2_units, 1)
         ).to(self.__device)
 
+        self.reset_params()
+
     def forward(self, state, action) -> torch.Tensor:
         state_net_output = self.__state_net(state)
         return self.__net(torch.cat((state_net_output, action), 1))

@@ -22,6 +22,8 @@ class Actor(nn.Module):
             nn.Tanh()
         ).to(self.__device)
 
+        self.reset_params()
+
     def forward(self, state) -> torch.Tensor:
         return self.__net(state)
 
