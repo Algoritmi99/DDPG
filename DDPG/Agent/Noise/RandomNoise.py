@@ -13,4 +13,4 @@ class RandomNoise(Noise):
         self.noiseVariance = noiseVariance
 
     def sample(self) -> torch.Tensor:
-        return torch.randn_like(self.outSample) * self.noiseVariance
+        return (torch.randn_like(self.outSample) * self.noiseVariance).to(self.device)
