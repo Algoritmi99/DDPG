@@ -1,3 +1,5 @@
+import time
+
 import torch
 import gymnasium as gym
 import numpy as np
@@ -41,6 +43,8 @@ class Evaluator(object):
                 state, reward, terminated, truncated, info = self.__environment.step(numpy_action)
                 rewards.append(reward)
                 state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+                if not self.__trainMode:
+                    time.sleep(0.05)
 
             episodeReward = sum(rewards)
             returns.append(episodeReward)

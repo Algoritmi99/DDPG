@@ -6,5 +6,5 @@
   "batch_size": 32,
   "num_trainingEpisodes": 200,
   "max_training_steps": 3000,
-  "environment_name": "Ant-v4"
+  "environment_name": "HalfCheetah-v4"
 }
