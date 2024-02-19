@@ -94,7 +94,8 @@ if __name__ == "__main__":
         print("Accepted arguments for <Work>: \n"
               "{\n"
               "\t --train_and_save, \n"
-              "\t --visual_evaluation <path to saved model> <number of episodes>")
+              "\t --visual_evaluation <path to saved model> <number of episodes>\n"
+              "}")
 
     elif args[1] == "--train_and_save":
         with open("./settings.json") as f:
