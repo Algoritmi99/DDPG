@@ -7,9 +7,9 @@ import math
     make for reusing to keep the code cleaner and easier to read.
 """
 
-classic_envs = ['MountainCarContinuous-v0', 'Pendulum-v1']
+classic_envs = ['MountainCarContinuous-v0', 'Pendulum-v1', 'InvertedDoublePendulum-v4', 'InvertedPendulum-v4']
 mujoco_envs = ['Ant-v4', 'HalfCheetah-v4', 'Hopper-v4', 'HumanoidStandup-v4', 'Humanoid-v4', 'Reacher-v4',
-               'Swimmer-v4', 'Walker2d-v4', 'InvertedDoublePendulum-v4', 'InvertedPendulum-v4', 'Pusher-v4']
+               'Walker2d-v4', 'Pusher-v4']
 
 
 def hidden_layer_init(layer):
