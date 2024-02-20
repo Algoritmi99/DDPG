@@ -5,9 +5,6 @@
 ## Getting started
 Clone the repository and run main.py with argument "-h" to learn how to use it.
 
-## Test and Deploy
-Use the built-in continuous integration in GitLab.
-
 ## Documentation
 for and extensive documentation refer to "Report.pdf".
 
