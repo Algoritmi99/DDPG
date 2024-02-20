@@ -4,7 +4,7 @@
   "tau": 0.05,
   "replayBuffer_capacity": 10000,
   "batch_size": 32,
-  "num_trainingEpisodes": 200,
+  "num_trainingEpisodes": 10000,
   "max_training_steps": 3000,
   "environment_name": "Ant-v4"
 }
