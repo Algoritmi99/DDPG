@@ -24,6 +24,7 @@ def train_and_save(settings: dict):
     batch_size = int(settings["batch_size"])
     num_episodes = int(settings['num_trainingEpisodes'])
     max_steps = int(settings["max_training_steps"])
+    iter_for_plotting = int(settings["num_of_iter_for_plotting"])
     environment_name = settings['environment_name']
 
     if not supported(environment_name):
@@ -70,7 +71,7 @@ def train_and_save(settings: dict):
         mujoco_mode=isMujoco(environment_name)
     )
 
-    trainer.train(num_episodes, max_steps)
+    trainer.train(num_episodes, max_steps, iter_for_plotting)
 
     save_agent(agent, "./agent/" + environment_name, "trainedAgent.agent")
 

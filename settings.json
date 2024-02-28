@@ -4,7 +4,8 @@
   "tau": 0.05,
   "replayBuffer_capacity": 10000,
   "batch_size": 32,
-  "num_trainingEpisodes": 200,
+  "num_trainingEpisodes": 20,
   "max_training_steps": 3000,
-  "environment_name": "MountainCarContinuous-v0"
+  "num_of_iter_for_plotting": 3,
+  "environment_name": "Pendulum-v1"
 }
