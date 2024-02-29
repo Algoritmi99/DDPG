@@ -30,7 +30,7 @@ class Evaluator(object):
         self.__device = device
         self.__mujoco_mode = mujoco_mode
 
-    def evaluate(self, num_episodes: int, current_iteration: int):
+    def evaluate(self, num_episodes: int, current_iteration=0):
         state, info = self.__environment.reset()
         state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         terminated, truncated = (False, False)

@@ -17,11 +17,17 @@ class Plotter(object):
         self.__evaluationRewardsPerStep[iteration].append(reward)
 
     def plot_rewards(self, env_name):
-        for df, values in {'training_df': [self.__trainingRewardsPerStep, "Training"],
-                           'evaluation_df': [self.__trainingRewardsPerStep, "Evaluation"]}.items():
+        for key, values in {'training_df': [self.__trainingRewardsPerStep, "Training"],
+                            'evaluation_df': [self.__evaluationRewardsPerStep, "Evaluation"]}.items():
             df = pd.DataFrame(values[0])
             df = df.T
             df['step'] = df.index
+            print(len(df))
+            if key == "training_df":
+                df = df.iloc[::1000, :]
+            else:
+                df = df.iloc[::10, :]
+            print(len(df))
             df = df.rename(columns={0: 'reward_value_1', 1: 'reward_value_2', 2: 'reward_value_3'})
             df = pd.melt(df, id_vars=['step'],
                          value_vars=['reward_value_1', 'reward_value_2', 'reward_value_3'],

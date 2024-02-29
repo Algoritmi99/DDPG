@@ -7,6 +7,7 @@ import gymnasium as gym
 from DDPG.Agent.Actor import Actor
 from DDPG.Agent.Agent import Agent, save_agent, load_agent
 from DDPG.Agent.Critic import Critic
+from DDPG.Agent.Noise.OUNoise import OUNoise
 from DDPG.Agent.Noise.RandomNoise import RandomNoise
 from DDPG.DDPG_Evaluator import Evaluator
 from DDPG.DDPG_Trainer import Trainer
@@ -49,7 +50,8 @@ def train_and_save(settings: dict):
         critic,
         actor_optimizer,
         critic_optimizer,
-        RandomNoise(torch.from_numpy(train_env.action_space.sample()), 0.1),
+        # RandomNoise(torch.from_numpy(train_env.action_space.sample()), 0.1),
+        OUNoise(torch.tensor(train_env.action_space.sample())),
         discount_factor,
         tau,
         device=device
@@ -83,7 +85,7 @@ def evaluate_visually(settings: dict, path_to_saved_model: str, number_of_episod
     agent = load_agent(path_to_saved_model)
     agent.to('cpu')
     evaluator = Evaluator(env, agent, mujoco_mode=isMujoco(settings["environment_name"]))
-    eval_result = evaluator.evaluate(number_of_episodes)
+    eval_result = evaluator.evaluate(number_of_episodes, current_iteration=0)
     print("Average return:", eval_result)
 
 
