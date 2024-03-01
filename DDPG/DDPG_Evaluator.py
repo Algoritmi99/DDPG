@@ -1,9 +1,9 @@
 import time
 
-import torch
 import gymnasium as gym
-import numpy as np
+import torch
 from tqdm import tqdm
+
 from DDPG.Agent.Agent import Agent
 from DDPG.Plotter import Plotter
 
@@ -35,8 +35,10 @@ class Evaluator(object):
         state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         terminated, truncated = (False, False)
 
-        iterable = range(num_episodes) if self.__trainMode else tqdm(range(num_episodes))
-        for _ in iterable:
+        avg_reward = 0
+
+        episodes = range(num_episodes) if self.__trainMode else tqdm(range(num_episodes))
+        for _ in episodes:
             rewards = []
             while not (terminated or truncated):
                 state = state.to(self.__device)
@@ -54,6 +56,9 @@ class Evaluator(object):
             state, info = self.__environment.reset()
             state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
             terminated, truncated = (False, False)
+            avg_reward += sum(rewards) / num_episodes
+
+        return avg_reward
 
     def set_trainMode(self, trainMode: bool):
         self.__trainMode = trainMode
