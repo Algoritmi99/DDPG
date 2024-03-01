@@ -7,6 +7,7 @@ import gymnasium as gym
 from DDPG.Agent.Actor import Actor
 from DDPG.Agent.Agent import Agent, save_agent, load_agent
 from DDPG.Agent.Critic import Critic
+from DDPG.Agent.Noise.Noise import Noise
 from DDPG.Agent.Noise.OUNoise import OUNoise
 from DDPG.Agent.Noise.RandomNoise import RandomNoise
 from DDPG.DDPG_Evaluator import Evaluator
@@ -25,7 +26,8 @@ def train_and_save(settings: dict):
     batch_size = int(settings["batch_size"])
     num_episodes = int(settings['num_trainingEpisodes'])
     max_steps = int(settings["max_training_steps"])
-    iter_for_plotting = int(settings["num_of_iter_for_plotting"])
+    num_trainingAttempts = int(settings["num_trainingAttempts"])
+    noise = settings['noise']
     environment_name = settings['environment_name']
 
     if not supported(environment_name):
@@ -36,46 +38,57 @@ def train_and_save(settings: dict):
     print("Using device: ", device)
 
     # Training
-    train_env = gym.make(environment_name, render_mode=None)
-    eval_env = gym.make(environment_name, render_mode=None)
+    plotter = Plotter(num_trainingAttempts, num_episodes)
 
-    actor = Actor(train_env.observation_space.shape[0], train_env.action_space.shape[0], device=device)
-    critic = Critic(train_env.observation_space.shape[0], train_env.action_space.shape[0], device=device)
+    for i in range(num_trainingAttempts):
+        train_env = gym.make(environment_name, render_mode=None)
+        eval_env = gym.make(environment_name, render_mode=None)
 
-    actor_optimizer = (torch.optim.AdamW(params=actor.parameters(), lr=learning_rate))
-    critic_optimizer = torch.optim.AdamW(params=critic.parameters(), lr=learning_rate)
+        actor = Actor(train_env.observation_space.shape[0], train_env.action_space.shape[0], device=device)
+        critic = Critic(train_env.observation_space.shape[0], train_env.action_space.shape[0], device=device)
 
-    agent = Agent(
-        actor,
-        critic,
-        actor_optimizer,
-        critic_optimizer,
-        # RandomNoise(torch.from_numpy(train_env.action_space.sample()), 0.1),
-        OUNoise(torch.tensor(train_env.action_space.sample())),
-        discount_factor,
-        tau,
-        device=device
-    )
+        actor_optimizer = (torch.optim.AdamW(params=actor.parameters(), lr=learning_rate))
+        critic_optimizer = torch.optim.AdamW(params=critic.parameters(), lr=learning_rate)
 
-    replay_buffer = ReplayBuffer(replay_buffer_capacity, batch_size)
+        noise_obj = OUNoise(torch.tensor(train_env.action_space.sample())) if noise == "OUNoise" \
+            else RandomNoise(torch.from_numpy(train_env.action_space.sample()), 0.1)
 
-    plotter = Plotter(num_episodes)
+        agent = Agent(
+            actor,
+            critic,
+            actor_optimizer,
+            critic_optimizer,
+            noise_obj,
+            discount_factor,
+            tau,
+            device=device
+        )
 
-    evaluator = Evaluator(eval_env, agent, plotter=plotter, device=device, mujoco_mode=isMujoco(environment_name))
+        replay_buffer = ReplayBuffer(replay_buffer_capacity, batch_size)
 
-    trainer = Trainer(
-        train_env,
-        agent,
-        replay_buffer,
-        plotter=plotter,
-        evaluator=evaluator,
-        device=device,
-        mujoco_mode=isMujoco(environment_name)
-    )
+        evaluator = Evaluator(
+            eval_env,
+            agent,
+            plotter=plotter,
+            device=device,
+            mujoco_mode=isMujoco(environment_name),
+            evaluator_id=i
+        )
 
-    trainer.train(num_episodes, max_steps, iter_for_plotting)
+        trainer = Trainer(
+            train_env,
+            agent,
+            replay_buffer,
+            plotter=plotter,
+            evaluator=evaluator,
+            device=device,
+            mujoco_mode=isMujoco(environment_name),
+            trainer_id=i
+        )
 
-    save_agent(agent, "./agent/" + environment_name, "trainedAgent.agent")
+        trainer.train(num_episodes, max_steps)
+
+        save_agent(agent, "./agent/" + environment_name, "trainedAgent" + str(i) + ".agent")
 
     plotter.plot_rewards(environment_name)
 
@@ -85,7 +98,7 @@ def evaluate_visually(settings: dict, path_to_saved_model: str, number_of_episod
     agent = load_agent(path_to_saved_model)
     agent.to('cpu')
     evaluator = Evaluator(env, agent, mujoco_mode=isMujoco(settings["environment_name"]))
-    eval_result = evaluator.evaluate(number_of_episodes, current_iteration=0)
+    eval_result = evaluator.evaluate(number_of_episodes)
     print("Average return:", eval_result)
 
 

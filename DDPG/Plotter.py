@@ -6,28 +6,28 @@ import seaborn as sns
 
 
 class Plotter(object):
-    def __init__(self, num_episodes: int):
-        self.__trainingRewardsPerStep = [[], [], []]
-        self.__evaluationRewardsPerStep = [[], [], []]
+    def __init__(self, num_of_iter: int, num_episodes: int):
+        self.__trainingRewards = [[[] for _ in range(num_episodes)] for _ in range(num_of_iter)]
+        self.__evaluationRewards = [[] for _ in range(num_of_iter)]
 
-    def add_trainingRewardPerStep(self, reward, iteration):
-        self.__trainingRewardsPerStep[iteration].append(reward)
+    def add_trainingReward(self, reward, iteration, episode):
+        self.__trainingRewards[iteration][episode].append(reward)
 
-    def add_evaluationRewardPerStep(self, reward, iteration):
-        self.__evaluationRewardsPerStep[iteration].append(reward)
+    def add_evaluationReward(self, reward, iteration):
+        self.__evaluationRewards[iteration].append(reward)
 
     def plot_rewards(self, env_name):
-        for key, values in {'training_df': [self.__trainingRewardsPerStep, "Training"],
-                            'evaluation_df': [self.__evaluationRewardsPerStep, "Evaluation"]}.items():
+        temp = []
+        for i in self.__trainingRewards:
+            temp.append([sum(j) for j in i])
+
+        self.__trainingRewards = temp
+
+        for key, values in {'training_df': [self.__trainingRewards, "Training"],
+                            'evaluation_df': [self.__evaluationRewards, "Evaluation"]}.items():
             df = pd.DataFrame(values[0])
             df = df.T
             df['step'] = df.index
-            print(len(df))
-            if key == "training_df":
-                df = df.iloc[::1000, :]
-            else:
-                df = df.iloc[::10, :]
-            print(len(df))
             df = df.rename(columns={0: 'reward_value_1', 1: 'reward_value_2', 2: 'reward_value_3'})
             df = pd.melt(df, id_vars=['step'],
                          value_vars=['reward_value_1', 'reward_value_2', 'reward_value_3'],
@@ -36,7 +36,7 @@ class Plotter(object):
 
             plot = sns.lineplot(x='step', y='reward', data=df, label='Mean reward value')
             fig = plot.get_figure()
-            plt.xlabel('Step Number')
+            plt.xlabel('Episode')
             plt.ylabel('Reward Values')
             plt.title(values[1] + 'Rewards')
             plt.legend()

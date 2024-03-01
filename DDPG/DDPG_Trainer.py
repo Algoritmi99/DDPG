@@ -23,7 +23,8 @@ class Trainer(object):
                  plotter: Plotter = None,
                  evaluator: Evaluator = None,
                  device: str = 'cpu',
-                 mujoco_mode: bool = False
+                 mujoco_mode: bool = False,
+                 trainer_id: int = 0
                  ) -> None:
         self.__environment = environment
         self.__agent = agent
@@ -33,58 +34,58 @@ class Trainer(object):
         self.__evaluator.set_trainMode(True)
         self.__device = device
         self.__mujoco_mode = mujoco_mode
+        self.__trainer_id = trainer_id
 
-    def train(self, num_episodes: int, max_steps: int, iter_for_plotting: int):
+    def train(self, num_episodes: int, max_steps: int):
         state, info = self.__environment.reset()
         state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         terminated, truncated = (False, False)
-        for j in range(iter_for_plotting):
-            for i in tqdm(range(num_episodes)):
-                timeStep = 0
-                while not terminated and not truncated and timeStep < max_steps:
-                    state = state.to(self.__device)
-                    action = self.__agent.take_Action(state)
+        for i in tqdm(range(num_episodes)):
+            timeStep = 0
+            while not terminated and not truncated and timeStep < max_steps:
+                state = state.to(self.__device)
+                action = self.__agent.take_Action(state)
 
-                    numpy_action = action.to('cpu').squeeze().numpy()
-                    numpy_action = [numpy_action] if not self.__mujoco_mode else numpy_action
-                    next_state, reward, terminated, truncated, info = self.__environment.step(numpy_action)
+                numpy_action = action.to('cpu').squeeze().numpy()
+                numpy_action = [numpy_action] if not self.__mujoco_mode else numpy_action
+                next_state, reward, terminated, truncated, info = self.__environment.step(numpy_action)
 
-                    next_state = torch.tensor(next_state, dtype=torch.float32).unsqueeze(0).to(self.__device)
-                    reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(self.__device)
-                    terminated = torch.tensor(terminated, dtype=torch.bool).unsqueeze(0).to(self.__device)
-                    action = action.to(self.__device)
+                next_state = torch.tensor(next_state, dtype=torch.float32).unsqueeze(0).to(self.__device)
+                reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(self.__device)
+                terminated = torch.tensor(terminated, dtype=torch.bool).unsqueeze(0).to(self.__device)
+                action = action.to(self.__device)
 
-                    self.__replay_buffer.push(state, action, reward, next_state, terminated)
-                    state = next_state
+                self.__replay_buffer.push(state, action, reward, next_state, terminated)
+                state = next_state
 
-                    if self.__replay_buffer.canSample():
-                        (
-                            state_batch,
-                            action_batch,
-                            reward_batch,
-                            next_state_batch,
-                            terminated_batch
-                        ) = self.__replay_buffer.sample_batch()
+                if self.__replay_buffer.canSample():
+                    (
+                        state_batch,
+                        action_batch,
+                        reward_batch,
+                        next_state_batch,
+                        terminated_batch
+                    ) = self.__replay_buffer.sample_batch()
 
-                        self.__agent.update(
-                            state_batch,
-                            action_batch,
-                            reward_batch,
-                            next_state_batch,
-                            terminated_batch
-                        )
+                    self.__agent.update(
+                        state_batch,
+                        action_batch,
+                        reward_batch,
+                        next_state_batch,
+                        terminated_batch
+                    )
 
-                    if self.__plotter is not None:
-                        self.__plotter.add_trainingRewardPerStep(float(reward), j)
+                if self.__plotter is not None:
+                    self.__plotter.add_trainingReward(float(reward), self.__trainer_id, i)
 
-                    timeStep += 1
+                timeStep += 1
 
-                if self.__evaluator is not None and i % 10 == 0:
-                    self.__evaluator.evaluate(10, j)
+            if self.__evaluator is not None and i % 10 == 0:
+                self.__evaluator.evaluate(10)
 
-                state, info = self.__environment.reset()
-                state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
-                terminated, truncated = (False, False)
+            state, info = self.__environment.reset()
+            state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+            terminated, truncated = (False, False)
 
     def get_agent(self) -> Agent:
         return self.__agent

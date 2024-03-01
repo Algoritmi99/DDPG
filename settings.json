@@ -6,6 +6,7 @@
   "batch_size": 32,
   "num_trainingEpisodes": 200,
   "max_training_steps": 3000,
-  "num_of_iter_for_plotting": 3,
-  "environment_name": "MountainCarContinuous-v0"
+  "num_trainingAttempts": 3,
+  "noise": "random",
+  "environment_name": "Pendulum-v1"
 }

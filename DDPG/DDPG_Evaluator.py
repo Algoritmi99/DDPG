@@ -22,15 +22,18 @@ class Evaluator(object):
                  plotter: Plotter = None,
                  train_mode=False,
                  device: str = 'cpu',
-                 mujoco_mode: bool = False):
+                 mujoco_mode: bool = False,
+                 evaluator_id: int = 0
+                 ):
         self.__environment = environment
         self.__agent = agent
         self.__plotter = plotter
         self.__trainMode = train_mode
         self.__device = device
         self.__mujoco_mode = mujoco_mode
+        self.__evaluator_id = evaluator_id
 
-    def evaluate(self, num_episodes: int, current_iteration=0):
+    def evaluate(self, num_episodes: int):
         state, info = self.__environment.reset()
         state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         terminated, truncated = (False, False)
@@ -43,13 +46,13 @@ class Evaluator(object):
                 numpy_action = self.__agent.take_greedyAction(state).squeeze().to("cpu").numpy()
                 numpy_action = [numpy_action] if not self.__mujoco_mode else numpy_action
                 state, reward, terminated, truncated, info = self.__environment.step(numpy_action)
-                rewards.append(reward)
+                rewards.append(float(reward))
                 state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
                 if not self.__trainMode:
                     time.sleep(0.05)
 
             if self.__plotter is not None:
-                self.__plotter.add_evaluationRewardPerStep(sum(rewards)/len(rewards), current_iteration)
+                self.__plotter.add_evaluationReward(np.mean(rewards), self.__evaluator_id)
 
             state, info = self.__environment.reset()
             state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
