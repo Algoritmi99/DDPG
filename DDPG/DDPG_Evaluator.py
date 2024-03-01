@@ -52,7 +52,7 @@ class Evaluator(object):
                     time.sleep(0.05)
 
             if self.__plotter is not None:
-                self.__plotter.add_evaluationReward(np.mean(rewards), self.__evaluator_id)
+                self.__plotter.add_evaluationReward(sum(rewards), self.__evaluator_id)
 
             state, info = self.__environment.reset()
             state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
