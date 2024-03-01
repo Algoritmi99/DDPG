@@ -7,9 +7,6 @@ from DDPG.DDPG_Evaluator import Evaluator
 from DDPG.ReplayBuffer import ReplayBuffer
 from DDPG.Plotter import Plotter
 
-#TODO:
-# now - looped 3 times, appending rew values to reward tables for the current iteration
-#
 
 class Trainer(object):
     """

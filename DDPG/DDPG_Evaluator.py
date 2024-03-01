@@ -7,9 +7,6 @@ from tqdm import tqdm
 from DDPG.Agent.Agent import Agent
 from DDPG.Plotter import Plotter
 
-# TODO:
-#  now - save the reward value for each step of each episode,
-#  taking mean of the reward value and add it to a global table
 
 class Evaluator(object):
     """
