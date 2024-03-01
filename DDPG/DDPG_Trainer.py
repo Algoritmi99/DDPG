@@ -7,6 +7,9 @@ from DDPG.DDPG_Evaluator import Evaluator
 from DDPG.ReplayBuffer import ReplayBuffer
 from DDPG.Plotter import Plotter
 
+#TODO:
+# now - looped 3 times, appending rew values to reward tables for the current iteration
+#
 
 class Trainer(object):
     """
@@ -20,7 +23,8 @@ class Trainer(object):
                  plotter: Plotter = None,
                  evaluator: Evaluator = None,
                  device: str = 'cpu',
-                 mujoco_mode: bool = False
+                 mujoco_mode: bool = False,
+                 trainer_id: int = 0
                  ) -> None:
         self.__environment = environment
         self.__agent = agent
@@ -30,6 +34,7 @@ class Trainer(object):
         self.__evaluator.set_trainMode(True)
         self.__device = device
         self.__mujoco_mode = mujoco_mode
+        self.__trainer_id = trainer_id
 
     def train(self, num_episodes: int, max_steps: int):
         state, info = self.__environment.reset()
@@ -71,7 +76,7 @@ class Trainer(object):
                     )
 
                 if self.__plotter is not None:
-                    self.__plotter.add_trainingReward(float(reward), i)
+                    self.__plotter.add_trainingReward(float(reward), self.__trainer_id, i)
 
                 timeStep += 1
 

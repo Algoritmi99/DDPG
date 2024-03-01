@@ -30,4 +30,4 @@ class OUNoise(Noise):
         x = self.state
         dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for _ in range(len(x))])
         self.state = x + dx
-        return self.state.astype(self.dtype).to(self.device)
+        return torch.tensor(self.state.astype(self.dtype)).to(self.device)
